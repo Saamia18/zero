@@ -1,4 +1,4 @@
-# Zero
+# ZeroClash
 
 > Clash-free smart campus equipment booking with a 3D campus twin, scheduling intelligence, QR check-in, waitlists, and Supabase-ready persistence.
 
