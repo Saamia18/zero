@@ -1,465 +1,202 @@
-# ZeroClash
+# Zero
+
+> Clash-free smart campus equipment booking with a 3D campus twin, scheduling intelligence, QR check-in, waitlists, and Supabase-ready persistence.
 
 <p align="center">
-  <img src="reference/campus-hub.jpeg" alt="ZeroClash 3D campus map preview" width="920" />
-</p>
-
-<p align="center">
-  <strong>A premium smart-campus equipment booking platform with a 3D digital twin, clash-free scheduling, QR check-in, waitlist automation, admin controls, demand intelligence, and Supabase-ready persistence.</strong>
+  <img src="reference/campus-hub.jpeg" alt="Zero campus hub preview" width="920" />
 </p>
 
 <p align="center">
   <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=111827" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
-  <img alt="Three.js" src="https://img.shields.io/badge/Three.js-3D%20Campus-111827?style=for-the-badge&logo=threedotjs&logoColor=white" />
-  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?style=for-the-badge&logo=supabase&logoColor=111827" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img alt="Three.js" src="https://img.shields.io/badge/Three.js-0.174-111827?style=for-the-badge&logo=threedotjs&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3.4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-ready-3ECF8E?style=for-the-badge&logo=supabase&logoColor=111827" />
 </p>
 
----
+## Table of Contents
 
-## The Idea
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Screenshots and Demo](#screenshots-and-demo)
+- [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [Scripts](#scripts)
+- [Future Improvements](#future-improvements)
+- [Contributing](#contributing)
 
-ZeroClash is a full-stack-ready campus equipment reservation system built to solve a very real college problem: shared cameras, projectors, VR headsets, microscopes, GPUs, printers, and testing kits often get double-booked, misplaced, underused, or blocked by unclear maintenance schedules.
+## Overview
 
-Instead of presenting equipment booking as a boring table, ZeroClash turns the entire campus into an interactive command center:
+Zero is a smart campus equipment scheduling app built around the ZeroClash product experience. It helps students, faculty, researchers, and admins discover shared equipment, inspect building-level availability, reserve time slots, avoid booking conflicts, manage waitlists, validate check-ins with QR codes, and analyze future demand.
 
-- A 3D campus map shows where equipment actually lives.
-- A compact Apple-style booking calendar prevents clashes before they happen.
-- A waitlist cascade automatically reallocates cancelled slots.
-- QR check-in/check-out validates real booking tickets.
-- Admin override tools handle exceptional requests with audit trails.
-- Demand forecasting reveals which equipment will be under pressure next.
-- Supabase persistence is ready, while mock fallback keeps the project instantly runnable.
+The app runs immediately with demo scheduling data and can optionally connect to Supabase for persistent equipment, booking, waitlist, and audit-log records.
 
-This project is designed to feel like a polished product demo, not a static prototype.
+## Key Features
 
----
-
-## Submission Snapshot
-
-| Area | What ZeroClash Delivers |
-| --- | --- |
-| Campus experience | Interactive 3D digital twin with building selection, equipment pins, camera controls, and usage heatwaves |
-| Booking safety | Conflict-aware booking creation, cancellation, maintenance lockouts, and overlap prevention |
-| Calendar | Day, week, and month booking views with compact equipment icons and readable event details |
-| Waitlist | Priority scoring, queue positions, 10-minute offer windows, accept/decline/cancel flows |
-| QR workflow | Unique QR per confirmed booking, scanner flow, manual fallback, validation, check-in, and check-out |
-| Admin tools | Approvals, rejection, conflict resolution, maintenance blocks, reasons, and audit log |
-| Forecasting | Demand charts, category ranking, unit ranking, utilization heatmap, supply vs demand |
-| Assistant | Floating mini chatbot for availability, booking steps, conflicts, and QR help |
-| Persistence | Supabase schema, RLS policies, overlap guard, env-based credentials, mock fallback |
-| UI quality | Light/dark themes, responsive sidebar, compact cards, icon-first equipment design |
-
----
-
-## Visual Highlights
-
-### 3D Campus Digital Twin
-
-ZeroClash opens with a full-screen interactive campus model built with Three.js and React Three Fiber. Buildings are rendered as detailed procedural architecture with lit windows, roofs, antennas, entrance details, and hover/selection states.
-
-The map is not decoration. It is connected to the actual equipment data.
-
-- Select buildings to inspect location-based availability.
-- View live equipment pins above buildings.
-- Toggle the usage heatmap directly on the 3D scene.
-- Rotate, zoom, and inspect the campus without leaving the booking flow.
-
-### Equipment Icon System
-
-The app uses compact equipment icons across the catalogue, calendar, waitlist, map pins, and QR booking views.
-
-| Camera | GPU | VR | Microscope | Printer | Projector | Lab Kit | Device |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <img src="public/assets/icons/camera.png" width="54" /> | <img src="public/assets/icons/gpu.png" width="54" /> | <img src="public/assets/icons/vr.png" width="54" /> | <img src="public/assets/icons/microscope.png" width="54" /> | <img src="public/assets/icons/printer.png" width="54" /> | <img src="public/assets/icons/projector.png" width="54" /> | <img src="public/assets/icons/labkit.png" width="54" /> | <img src="public/assets/icons/device.png" width="54" /> |
-
----
-
-## Core Features
-
-### 1. 3D Campus Map
-
-The campus map is the visual center of the application.
-
-- Procedural 3D buildings with campus-specific placement.
-- Building selection and deselection.
-- Equipment pins positioned on building rooftops.
-- Compact contextual building cards.
-- Usage Heatmap toggle with green, yellow, orange, and red intensity waves.
-- Heatwaves stay attached to the correct buildings during orbit, zoom, and camera movement.
-- Grid, zoom, reset, and view controls.
-- Clean light/dark theme support.
-
-### 2. Equipment Catalogue
-
-The equipment page acts as the inventory layer for the system.
-
-- Searchable equipment catalogue.
-- Category filters.
-- Availability filters.
-- Equipment icons, names, units, locations, and statuses.
-- Quick navigation to map context.
-- Booking entry points for available equipment.
-
-Supported equipment types:
-
-- DSLR Camera
-- GPU Cluster
-- VR Headset
-- Microscope
-- 3D Printer
-- Projector
-- Lab Kit
-- Testing Device
-
-### 3. Booking Calendar
-
-ZeroClash includes a compact calendar inspired by modern scheduling apps.
-
-- Day, week, and month views.
-- Today button and date navigation.
-- Category and availability filters.
-- Search by equipment or building.
-- Icon-first booking indicators.
-- Event details dialog.
-- Booking creation from calendar slots.
-- Booking cancellation.
-- Conflict-aware interval validation.
-- Compact month view with `+N more` behavior.
-- Responsive horizontal scrolling for dense timelines.
-
-The calendar focuses on what matters: equipment, time, status, and action.
-
-### 4. Waitlist Cascade
-
-The waitlist module simulates a realistic queue and reallocation engine.
-
-- Compact equipment tile grid.
-- Queue position tracking.
-- Transparent priority score.
-- Role, urgency, and no-show penalty inputs.
-- Requested time slots.
-- 10-minute offer windows.
-- Accept, decline, expire, and cancel flows.
-- Automatic cascade to the next eligible user when a slot opens.
-- Calendar state updates when an offer becomes a booking.
-
-Priority formula:
-
-```text
-Role weight + urgency x 12 - no-show penalty x 2
-```
-
-### 5. Admin Override Console
-
-Exceptional booking cases need careful controls. The admin dashboard provides that layer.
-
-- Approve pending requests.
-- Reject requests.
-- Resolve exceptional conflicts.
-- Block equipment for maintenance.
-- Clear maintenance.
-- Trigger waitlist override decisions.
-- Require a reason for every admin action.
-- Show actor, reason, action, target, and timestamp in the audit log.
-- Prevent overlapping confirmed bookings.
-- Prevent unsafe maintenance bypasses.
-
-### 6. QR Check-In and Check-Out
-
-ZeroClash turns bookings into verifiable tickets.
-
-- Unique QR token per confirmed booking.
-- My Bookings section.
-- QR display for selected booking.
-- Camera scan flow where supported by the browser.
-- Manual booking ID or QR payload fallback.
-- Booking ID, equipment ID, start time, and QR token validation.
-- Check-in only within valid booking rules.
-- Check-out only after check-in.
-- Duplicate check-in/check-out prevention.
-- Status and timestamp updates shared with the booking system.
-
-### 7. Demand Forecasting
-
-The forecasting dashboard makes scheduling data readable.
-
-- Predicted request counts.
-- Utilization percentage.
-- Peak usage periods.
-- Shortage risk indicators.
-- Historical vs forecast chart.
-- Highest demand categories.
-- Ranked equipment units.
-- Day x hour utilization heatmap.
-- Demand by building.
-- Supply vs demand chart.
-- Recommendation cards.
-
-### 8. Mini Chatbot
-
-ZeroClash includes a floating assistant in the bottom-right corner.
-
-Supported questions:
-
-- Equipment availability.
-- How to book equipment.
-- Booking conflicts.
-- QR check-in/check-out.
-
-The assistant includes:
-
-- Suggested question chips.
-- Natural-language input.
-- Typing animation.
-- Concise responses.
-- Responses based on current app data where available.
-- A clean architecture ready for a real AI API later.
-
-It does not pretend that an external AI service is connected.
-
-### 9. Supabase-Ready Persistence
-
-ZeroClash can run instantly with local mock data, but it is also prepared for Supabase persistence.
-
-Included:
-
-- Supabase client setup.
-- Environment-variable credentials.
-- Equipment table.
-- Bookings table.
-- Waitlist table.
-- Audit log table.
-- Row Level Security policies.
-- Active booking overlap prevention with a PostgreSQL exclusion constraint.
-- Mock fallback if credentials are not present.
-
-No secret keys are committed.
-
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-  A[React 19 + Vite] --> B[ZeroClash App Shell]
-  B --> C[3D Campus Map]
-  B --> D[Scheduling Dashboard]
-  B --> E[Mini Chatbot]
-  C --> C1[Three.js Buildings]
-  C --> C2[Equipment Pins]
-  C --> C3[Usage Heatmap]
-  D --> D1[Equipment Catalogue]
-  D --> D2[Booking Calendar]
-  D --> D3[QR Check-In]
-  D --> D4[Waitlist Cascade]
-  D --> D5[Admin Override]
-  D --> D6[Demand Forecasting]
-  D --> F[Scheduling State Layer]
-  E --> F
-  F --> G{Supabase credentials?}
-  G -->|Yes| H[Supabase Tables + RLS + Conflict Guards]
-  G -->|No| I[Mock Data Fallback]
-```
-
----
+- Interactive 3D campus map built with Three.js and React Three Fiber.
+- Building selection, equipment pins, status legends, viewport controls, and usage heatmap overlays.
+- Equipment catalogue with category/status filtering and booking entry points.
+- Day, week, and month booking calendar with conflict-aware reservation logic.
+- QR check-in/check-out flow with generated booking payloads and validation rules.
+- Waitlist cascade with priority scoring, offer windows, accept/decline/expire flows, and queue pressure tracking.
+- Admin override console for approvals, rejections, conflict resolution, maintenance blocks, and audit entries.
+- Demand intelligence dashboard with forecast summaries, utilization views, category rankings, and recommendations.
+- Floating mini assistant for common availability, booking, conflict, and QR workflow questions.
+- Light/dark theme support with persisted theme preference.
+- Supabase integration with mock-data fallback when credentials are not configured.
 
 ## Tech Stack
 
-| Layer | Technology |
+| Layer | Technologies |
 | --- | --- |
 | Frontend | React 19, TypeScript, Vite |
-| 3D | Three.js, React Three Fiber, Drei, Postprocessing |
-| Styling | Tailwind CSS, custom theme tokens |
-| State | React state, Zustand for campus map state |
-| Icons | Lucide React plus custom equipment image icons |
-| Persistence | Supabase client with mock fallback |
-| Database safety | PostgreSQL RLS and booking overlap exclusion constraint |
-| Build | TypeScript project build plus Vite production bundle |
+| 3D experience | Three.js, React Three Fiber, Drei, React Three Postprocessing |
+| Styling | Tailwind CSS, custom CSS theme tokens |
+| State | React hooks, Zustand campus selection store |
+| Data | Local mock dataset, optional Supabase client |
+| Database assets | SQL migrations for Supabase/PostgreSQL tables, RLS policies, and booking conflict guards |
+| UI assets | Lucide React icons and local equipment icon images |
 
----
+## Screenshots and Demo
 
-## Project Structure
+The repository includes a campus preview image:
 
-```text
-ZeroClash-main/
-├── public/
-│   └── assets/
-│       ├── equipment-sheet.jpeg
-│       └── icons/
-├── reference/
-│   └── campus-hub.jpeg
-├── src/
-│   ├── components/
-│   │   ├── AdminOverrideDashboard.tsx
-│   │   ├── AnalyticsPlaceholder.tsx
-│   │   ├── DemandIntelligenceDashboard.tsx
-│   │   ├── EquipmentCatalog.tsx
-│   │   ├── EquipmentIconTile.tsx
-│   │   ├── GanttBookingCalendar.tsx
-│   │   ├── MiniChatbot.tsx
-│   │   ├── MyBookingsQRCode.tsx
-│   │   ├── SidebarNav.tsx
-│   │   └── WaitlistCascadeDashboard.tsx
-│   ├── data/
-│   │   └── mock.ts
-│   ├── lib/
-│   │   ├── schedulingData.ts
-│   │   ├── supabaseClient.ts
-│   │   └── supabaseScheduling.ts
-│   ├── scene/
-│   │   ├── BuildingMesh.tsx
-│   │   ├── CampusCanvas.tsx
-│   │   ├── CampusGround.tsx
-│   │   └── EquipmentPins.tsx
-│   ├── store/
-│   │   └── campusStore.ts
-│   ├── types/
-│   │   └── scheduling.ts
-│   └── utils/
-│       ├── forecasting.ts
-│       ├── qrCode.ts
-│       └── usageHeatmap.ts
-├── supabase/
-│   └── migrations/
-├── package.json
-├── tailwind.config.js
-└── vite.config.ts
-```
+![Zero campus hub preview](reference/campus-hub.jpeg)
 
----
+Local equipment icons are stored in `public/assets/icons/` and are used throughout the catalogue, calendar, map pins, and QR booking views.
 
-## Getting Started
+## Installation
 
-### 1. Clone
+### Prerequisites
+
+- Node.js 18 or newer
+- npm
+
+### Clone the repository
 
 ```bash
-git clone https://github.com/Saamia18/ZEROCLASH.git
-cd ZEROCLASH
+git clone https://github.com/Saamia18/zero.git
+cd zero
 ```
 
-### 2. Install
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Run
+### Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open:
+Vite will print the local URL in the terminal, usually:
 
 ```text
-http://127.0.0.1:5173
+http://localhost:5173
 ```
 
-### 4. Build
+### Build for production
 
 ```bash
 npm run build
 ```
 
-### 5. Preview Production Build
+### Preview the production build
 
 ```bash
 npm run preview
 ```
 
----
+## Environment Variables
 
-## Optional Supabase Setup
+Zero can run without environment variables by using the built-in demo dataset.
 
-ZeroClash works without Supabase. If credentials are missing, it uses the built-in mock data fallback.
-
-To enable persistence:
-
-### 1. Create `.env`
+To enable Supabase persistence, create a local `.env` file based on `.env.example`:
 
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
 ```
 
-### 2. Run Migrations
+Then apply the SQL files in `supabase/migrations/` to your Supabase project.
 
-Run the SQL files inside:
+Do not commit `.env` or private credentials. The repository's `.gitignore` excludes local environment files, dependency folders, build outputs, TypeScript build info, logs, and local inspection artifacts.
 
-```text
-supabase/migrations/
-```
-
-The main schema migration creates:
-
-- `zero_clash_equipment`
-- `zero_clash_bookings`
-- `zero_clash_waitlist_entries`
-- `zero_clash_audit_log`
-
-It also enables RLS and prevents overlapping active bookings.
-
-### 3. Restart Dev Server
-
-```bash
-npm run dev
-```
-
----
-
-## Judge Walkthrough
-
-For a high-impact demo, walk through the project in this order:
-
-1. Open the 3D Campus Map and rotate the campus.
-2. Toggle Usage Heatmap to show live intensity waves.
-3. Select a building and inspect equipment availability.
-4. Open Equipment Catalogue and filter by category/status.
-5. Use the Booking Calendar to create or inspect a booking.
-6. Open My Bookings and show the QR code flow.
-7. Use Waitlist Cascade to inspect priority scores and offer windows.
-8. Open Admin Override and show the audit log.
-9. Open Demand Intelligence and show the forecast/heatmap charts.
-10. Open the Mini Chatbot and ask: `What equipment is available?`
-
----
-
-## What Makes ZeroClash Stand Out
-
-- It is visual, not just functional.
-- It solves the complete booking lifecycle.
-- It connects physical campus space with scheduling data.
-- It prevents the core failure case: overlapping bookings.
-- It supports maintenance and admin exceptions.
-- It includes QR validation rather than simple status toggles.
-- It has forecasting, waitlisting, and auditability.
-- It is ready for persistence but still runnable instantly.
-
-ZeroClash is built to feel like a real campus operations product: fast, modern, visual, and practical.
-
----
-
-## Build Status
-
-Latest local production build:
-
-```bash
-npm run build
-```
-
-Expected result:
+## Project Structure
 
 ```text
-tsc -b && vite build
-build completed successfully
+.
+├── public/
+│   └── assets/              # Equipment sprite sheet and icon images
+├── reference/               # Preview/reference image used in this README
+├── scripts/                 # Utility scripts for asset preparation
+├── src/
+│   ├── components/          # Dashboards, calendar, catalogue, QR, sidebar, assistant, UI controls
+│   ├── data/                # Mock campus buildings and equipment
+│   ├── lib/                 # Scheduling state and Supabase data access
+│   ├── scene/               # 3D campus scene, buildings, ground, camera, and equipment pins
+│   ├── store/               # Zustand store for campus selection state
+│   ├── types/               # Shared scheduling types
+│   └── utils/               # Forecasting, QR, and usage heatmap helpers
+├── supabase/
+│   └── migrations/          # Supabase/PostgreSQL schema and conflict guards
+├── package.json
+├── tailwind.config.js
+└── vite.config.ts
 ```
 
-Note: Vite may warn about large chunks because the project includes a full 3D rendering stack. The build still completes successfully.
+## Architecture
 
----
+```mermaid
+flowchart TD
+  User[Campus user or admin] --> App[React + Vite app shell]
+  App --> Campus[3D campus map]
+  App --> Scheduling[Scheduling dashboards]
+  App --> Assistant[Mini assistant]
 
-## License
+  Campus --> Buildings[Buildings, equipment pins, heatmap]
+  Scheduling --> Catalogue[Equipment catalogue]
+  Scheduling --> Calendar[Booking calendar]
+  Scheduling --> QR[QR check-in/out]
+  Scheduling --> Waitlist[Waitlist cascade]
+  Scheduling --> Admin[Admin overrides]
+  Scheduling --> Demand[Demand intelligence]
 
-MIT License.
+  Catalogue --> State[Scheduling state layer]
+  Calendar --> State
+  QR --> State
+  Waitlist --> State
+  Admin --> State
+  Demand --> State
+  Assistant --> State
+
+  State --> Credentials{Supabase env configured?}
+  Credentials -->|Yes| Supabase[Supabase tables, RLS, audit log, conflict guards]
+  Credentials -->|No| Demo[Local demo dataset]
+```
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | Type-check and create a production build |
+| `npm run preview` | Preview the production build locally |
+
+## Future Improvements
+
+- Add authentication and role-based access control for student, faculty, and admin workflows.
+- Connect QR scanning to real device camera permissions and deployment-specific check-in rules.
+- Add automated tests around booking conflicts, waitlist cascades, and Supabase persistence.
+- Add exportable reports for utilization, shortages, and audit history.
+- Deploy a hosted demo and add live screenshots or video once available.
+
+## Contributing
+
+Contributions are welcome through pull requests. Keep changes focused, avoid committing secrets or generated dependency/build folders, and run `npm run build` before opening a PR.

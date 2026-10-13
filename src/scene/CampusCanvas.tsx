@@ -1,5 +1,5 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useEffect } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { CampusGround } from './CampusGround';
 import { CampusBuildings } from './CampusBuildings';
@@ -7,15 +7,29 @@ import { EquipmentPins } from './EquipmentPins';
 import { CameraController } from './CameraController';
 import { useCampusStore } from '../store/campusStore';
 import { BuildingUsageStats } from '../utils/usageHeatmap';
+import type { AppTheme } from '../components/ThemeToggle';
+import { scenePalette } from './sceneTheme';
 
 interface CampusCanvasProps {
   heatmapEnabled?: boolean;
   buildingUsage?: Record<string, BuildingUsageStats>;
   usageMax?: number;
+  theme?: AppTheme;
 }
 
-export const CampusCanvas: React.FC<CampusCanvasProps> = ({ heatmapEnabled = false, buildingUsage = {}, usageMax = 1 }) => {
+const SceneThemeBridge: React.FC<{ theme: AppTheme }> = ({ theme }) => {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    gl.setClearColor(scenePalette[theme].clear);
+  }, [gl, theme]);
+
+  return null;
+};
+
+export const CampusCanvas: React.FC<CampusCanvasProps> = ({ heatmapEnabled = false, buildingUsage = {}, usageMax = 1, theme = 'dark' }) => {
   const clearMapSelection = useCampusStore((s) => s.clearMapSelection);
+  const palette = scenePalette[theme];
 
   return (
     <div
@@ -38,28 +52,29 @@ export const CampusCanvas: React.FC<CampusCanvasProps> = ({ heatmapEnabled = fal
           powerPreference: 'high-performance',
         }}
         onCreated={({ gl, camera }) => {
-          gl.setClearColor('#050B14');
+          gl.setClearColor(palette.clear);
           camera.lookAt(0.8, 0, 0.5);
         }}
       >
-        <ambientLight intensity={0.4} color="#cceeff" />
-        <directionalLight position={[30, 50, 30]} intensity={0.8} color="#ffffff" />
-        <pointLight position={[-10, 15, -10]} intensity={1.5} color="#00e5ff" distance={40} />
-        <pointLight position={[10, 15, 10]} intensity={1.2} color="#f97316" distance={40} />
+        <SceneThemeBridge theme={theme} />
+        <ambientLight intensity={theme === 'dark' ? 0.4 : 0.7} color={palette.ambient} />
+        <directionalLight position={[30, 50, 30]} intensity={theme === 'dark' ? 0.8 : 1.1} color={palette.directional} />
+        <pointLight position={[-10, 15, -10]} intensity={theme === 'dark' ? 1.5 : 0.55} color={palette.accentLight} distance={40} />
+        <pointLight position={[10, 15, 10]} intensity={theme === 'dark' ? 1.2 : 0.7} color={palette.warmLight} distance={40} />
 
-        <CampusGround />
-        <CampusBuildings heatmapEnabled={heatmapEnabled} buildingUsage={buildingUsage} usageMax={usageMax} />
-        <EquipmentPins />
+        <CampusGround theme={theme} />
+        <CampusBuildings heatmapEnabled={heatmapEnabled} buildingUsage={buildingUsage} usageMax={usageMax} theme={theme} />
+        <EquipmentPins theme={theme} />
         <CameraController />
 
-        <EffectComposer enableNormalPass={false} multisampling={4}>
+        {theme === 'dark' && <EffectComposer enableNormalPass={false} multisampling={4}>
           <Bloom
             luminanceThreshold={0.2}
             luminanceSmoothing={0.85}
-            intensity={1.2}
+            intensity={palette.bloomIntensity}
             mipmapBlur
           />
-        </EffectComposer>
+        </EffectComposer>}
       </Canvas>
     </div>
   );

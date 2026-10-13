@@ -42,14 +42,14 @@ export const App: React.FC = () => {
           {/* 3D Isometric Digital Twin Canvas */}
           <div className="absolute inset-0 z-0">
             <ErrorBoundary>
-              <CampusCanvas heatmapEnabled={heatmapEnabled} buildingUsage={heatmapStats.byBuilding} usageMax={heatmapStats.max} />
+              <CampusCanvas heatmapEnabled={heatmapEnabled} buildingUsage={heatmapStats.byBuilding} usageMax={heatmapStats.max} theme={theme} />
             </ErrorBoundary>
           </div>
 
           {/* Top Center UI Overlay: Sci-fi Bracket Frame Title + Glowing Search Bar */}
           <header className="absolute top-5 inset-x-0 z-30 flex items-start justify-center pointer-events-none px-4">
             <SciFiHeader />
-            <div className="pointer-events-auto absolute right-4 top-0 md:right-6">
+            <div className="pointer-events-auto fixed right-4 top-5 z-50 md:right-6">
               <ThemeToggle theme={theme} onToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />
             </div>
           </header>
@@ -58,11 +58,7 @@ export const App: React.FC = () => {
             <button
               type="button"
               onClick={() => setHeatmapEnabled((enabled) => !enabled)}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-glass backdrop-blur-xl transition ${
-                heatmapEnabled
-                  ? 'border-orange-300 bg-orange-400 text-slate-950 shadow-[0_0_24px_rgba(251,146,60,0.45)]'
-                  : 'border-orange-400/40 bg-slate-950/82 text-orange-100 hover:border-orange-300 hover:bg-orange-400 hover:text-slate-950'
-              }`}
+              className={`usage-heatmap-button inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-glass backdrop-blur-xl transition ${heatmapEnabled ? 'is-active' : ''}`}
               aria-pressed={heatmapEnabled}
             >
               <span aria-hidden="true">🔥</span>

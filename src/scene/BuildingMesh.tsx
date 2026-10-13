@@ -4,12 +4,26 @@ import { Html } from '@react-three/drei';
 import { Building, MOCK_EQUIPMENT } from '../data/mock';
 import { useCampusStore } from '../store/campusStore';
 import { BuildingUsageStats, heatColorFor } from '../utils/usageHeatmap';
+import {
+  buildingAccentColor,
+  buildingRoofColor,
+  buildingSecondaryColor,
+  buildingWallColor,
+  CampusSceneTheme,
+  darkMaterial,
+  plinthMaterial,
+  roofMaterial,
+  scenePalette,
+  windowColor,
+  windowGlowColor,
+} from './sceneTheme';
 
 interface BuildingMeshProps {
   building: Building;
   heatmapEnabled?: boolean;
   usage?: BuildingUsageStats;
   usageMax?: number;
+  theme: CampusSceneTheme;
 }
 
 type BoxPart = {
@@ -29,7 +43,7 @@ type WindowPane = {
   lit: boolean;
 };
 
-export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEnabled = false, usage, usageMax = 1 }) => {
+export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEnabled = false, usage, usageMax = 1, theme }) => {
   const [hovered, setHovered] = useState(false);
   const selectedBuildingId = useCampusStore((s) => s.selectedBuildingId);
   const matchingBuildingIds = useCampusStore((s) => s.matchingBuildingIds);
@@ -44,64 +58,33 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
   const heatColor = heatColorFor(usageIntensity);
   const hasHeatUsage = heatmapEnabled && isMatch && usageCount > 0 && usageIntensity > 0;
   const [w, h, d] = building.size;
+  const palette = scenePalette[theme];
+  const themeIsLight = theme === 'light';
+  const sceneBlending = palette.additive ? THREE.AdditiveBlending : THREE.NormalBlending;
 
   const statusColor = useMemo(() => {
-    if (building.equipmentIds.length === 0) return building.neonColor;
+    const accent = buildingAccentColor(building, theme);
+    if (building.equipmentIds.length === 0) return accent;
 
     const units = building.equipmentIds.map((id) => MOCK_EQUIPMENT[id]).filter(Boolean);
     const hasMaintenance = units.some((unit) => unit.status === 'maintenance');
     const allBooked = units.length > 0 && units.every((unit) => unit.status === 'booked');
     const hasAvailable = units.some((unit) => unit.status === 'available');
 
-    if (allBooked) return '#ef4444';
-    if (hasMaintenance) return '#eab308';
-    if (hasAvailable) return building.neonColor;
-    return building.neonColor;
-  }, [building]);
+    if (allBooked) return themeIsLight ? '#a84832' : '#ef4444';
+    if (hasMaintenance) return themeIsLight ? '#b18222' : '#eab308';
+    if (hasAvailable) return accent;
+    return accent;
+  }, [building, theme, themeIsLight]);
 
   const wallColor = useMemo(() => {
-    if (!isMatch) return '#101827';
-    if (hovered || isSelected) {
-      switch (building.colorTheme) {
-        case 'cyan':
-          return '#17334a';
-        case 'green':
-          return '#173827';
-        case 'orange':
-          return '#442515';
-        case 'dark-blue':
-        default:
-          return '#1c2b4d';
-      }
-    }
-
-    switch (building.colorTheme) {
-      case 'cyan':
-        return '#10283d';
-      case 'green':
-        return '#102b20';
-      case 'orange':
-        return '#2d190f';
-      case 'dark-blue':
-      default:
-        return '#121f35';
-    }
-  }, [building.colorTheme, hovered, isMatch, isSelected]);
+    if (!isMatch) return buildingWallColor(building, theme, 'dimmed');
+    return buildingWallColor(building, theme, hovered || isSelected ? 'active' : 'idle');
+  }, [building, hovered, isMatch, isSelected, theme]);
 
   const windowGlow = useMemo(() => {
-    if (!isMatch) return '#0369a1';
-    switch (building.colorTheme) {
-      case 'cyan':
-        return '#38bdf8';
-      case 'green':
-        return '#4ade80';
-      case 'orange':
-        return '#fb923c';
-      case 'dark-blue':
-      default:
-        return '#60a5fa';
-    }
-  }, [building.colorTheme, isMatch]);
+    return windowGlowColor(building, theme, isMatch);
+  }, [building, isMatch, theme]);
 
   const solidOpacity = wireframeOnly ? 0.08 : isMatch ? 1 : 0.32;
   const accentOpacity = isMatch ? (hovered || isSelected ? 1 : 0.72) : 0.2;
@@ -151,7 +134,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         key: 'base-plinth',
         pos: [0, 0.1, 0],
         size: [w + 0.55, 0.2, d + 0.55],
-        color: '#080e18',
+        color: plinthMaterial(theme),
         metalness: 0.2,
         roughness: 0.85,
       },
@@ -159,7 +142,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         key: 'roof-slab',
         pos: [0, h + 0.03, 0],
         size: [w - 0.25, 0.06, d - 0.25],
-        color: '#070c14',
+        color: themeIsLight ? buildingRoofColor(building, theme) : roofMaterial(theme),
         roughness: 0.9,
       },
       {
@@ -190,7 +173,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         key: 'penthouse',
         pos: [-w * 0.2, h + 0.42, -d * 0.15],
         size: [w * 0.38, 0.7, d * 0.38],
-        color: '#101827',
+        color: darkMaterial(theme, '#101827'),
         metalness: 0.4,
         roughness: 0.6,
       },
@@ -198,15 +181,15 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         key: 'penthouse-trim',
         pos: [-w * 0.2, h + 0.82, -d * 0.15],
         size: [w * 0.42, 0.07, d * 0.42],
-        color: '#0369a1',
+        color: themeIsLight ? buildingAccentColor(building, theme) : '#0369a1',
         emissive: statusColor,
-        emissiveIntensity: 0.2,
+        emissiveIntensity: themeIsLight ? 0.03 : 0.2,
       },
       {
         key: 'hvac-a',
         pos: [w * 0.22, h + 0.25, -d * 0.22],
         size: [0.8, 0.38, 0.65],
-        color: '#1e293b',
+        color: themeIsLight ? buildingSecondaryColor(building, theme) : darkMaterial(theme, '#1e293b'),
         metalness: 0.7,
         roughness: 0.4,
       },
@@ -214,14 +197,14 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         key: 'hvac-b',
         pos: [w * 0.22, h + 0.25, d * 0.2],
         size: [0.8, 0.38, 0.65],
-        color: '#1e293b',
+        color: themeIsLight ? buildingSecondaryColor(building, theme) : darkMaterial(theme, '#1e293b'),
         metalness: 0.7,
         roughness: 0.4,
       },
     ];
 
     return parts;
-  }, [d, h, statusColor, w, wallColor]);
+  }, [building, d, h, statusColor, theme, themeIsLight, w, wallColor]);
 
   const heatwaveLayers = useMemo(() => {
     const radiusX = Math.max(2, w * (0.55 + usageIntensity * 0.12));
@@ -306,11 +289,11 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <mesh key={`${building.id}-window-${index}`} position={pane.pos}>
           <boxGeometry args={pane.size} />
           <meshStandardMaterial
-            color={pane.lit ? '#1e3a5f' : '#0a101d'}
+            color={windowColor(theme, pane.lit)}
             transparent={wireframeOnly || !isMatch}
             opacity={wireframeOnly ? 0.25 : isMatch ? 1 : 0.38}
             emissive={pane.lit ? windowGlow : '#000000'}
-            emissiveIntensity={pane.lit && isMatch ? 0.72 : 0.1}
+            emissiveIntensity={themeIsLight ? (pane.lit && isMatch ? 0.08 : 0.01) : pane.lit && isMatch ? 0.72 : 0.1}
             roughness={0.22}
             metalness={0.5}
           />
@@ -321,7 +304,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <mesh castShadow receiveShadow>
           <boxGeometry args={[w * 0.32, h * 0.44, 0.4]} />
           <meshStandardMaterial
-            color="#0d1522"
+            color={themeIsLight ? buildingRoofColor(building, theme) : darkMaterial(theme, '#0d1522')}
             transparent={wireframeOnly || !isMatch}
             opacity={solidOpacity}
             roughness={0.7}
@@ -331,9 +314,9 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <mesh position={[0, -h * 0.05, 0.21]}>
           <planeGeometry args={[w * 0.18, h * 0.32]} />
           <meshStandardMaterial
-            color="#38bdf8"
+            color={themeIsLight ? buildingAccentColor(building, theme) : '#38bdf8'}
             emissive={statusColor}
-            emissiveIntensity={isMatch ? 0.62 : 0.16}
+            emissiveIntensity={themeIsLight ? (isMatch ? 0.05 : 0.01) : isMatch ? 0.62 : 0.16}
             transparent
             opacity={wireframeOnly ? 0.3 : 0.86}
             roughness={0.12}
@@ -341,7 +324,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         </mesh>
         <mesh position={[0, h * 0.22, 0.22]} castShadow>
           <boxGeometry args={[w * 0.38, 0.08, 0.6]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.6} transparent={wireframeOnly} opacity={wireframeOnly ? 0.18 : 1} />
+          <meshStandardMaterial color={themeIsLight ? buildingRoofColor(building, theme) : darkMaterial(theme, '#1e293b')} roughness={0.4} metalness={0.6} transparent={wireframeOnly} opacity={wireframeOnly ? 0.18 : 1} />
         </mesh>
       </group>
 
@@ -349,7 +332,7 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         {[0, 1, 2].map((step) => (
           <mesh key={step} receiveShadow position={[0, -step * 0.045, step * 0.22]}>
             <boxGeometry args={[w * (0.34 + step * 0.04), 0.12 - step * 0.02, 0.28]} />
-            <meshStandardMaterial color={step === 0 ? '#1e293b' : step === 1 ? '#162235' : '#0f172a'} roughness={0.9} />
+            <meshStandardMaterial color={themeIsLight ? (step === 0 ? buildingSecondaryColor(building, theme) : step === 1 ? buildingRoofColor(building, theme) : buildingAccentColor(building, theme)) : step === 0 ? '#1e293b' : step === 1 ? '#162235' : '#0f172a'} roughness={0.9} />
           </mesh>
         ))}
       </group>
@@ -357,11 +340,11 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
       <group position={[-w * 0.32, h + 0.78, d * 0.28]}>
         <mesh>
           <cylinderGeometry args={[0.03, 0.05, 1.35, 8]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} transparent={wireframeOnly} opacity={wireframeOnly ? 0.2 : 1} />
+          <meshStandardMaterial color={themeIsLight ? '#8f806b' : '#94a3b8'} metalness={0.9} roughness={0.2} transparent={wireframeOnly} opacity={wireframeOnly ? 0.2 : 1} />
         </mesh>
         <mesh position={[0, 0.32, 0]}>
           <boxGeometry args={[0.34, 0.035, 0.035]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.9} />
+          <meshStandardMaterial color={themeIsLight ? '#8f806b' : '#94a3b8'} metalness={0.9} />
         </mesh>
         <mesh position={[0, 0.72, 0]}>
           <sphereGeometry args={[0.085, 10, 10]} />
@@ -374,12 +357,12 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
           {[-w * 0.2, -w * 0.1, 0, w * 0.1, w * 0.2].map((x, index) => (
             <mesh key={index} position={[x, 0, 0.18]} castShadow>
               <cylinderGeometry args={[0.09, 0.12, h * 0.58, 12]} />
-              <meshStandardMaterial color="#d97706" roughness={0.42} metalness={0.28} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+              <meshStandardMaterial color={themeIsLight ? buildingSecondaryColor(building, theme) : '#d97706'} roughness={0.42} metalness={0.28} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
             </mesh>
           ))}
           <mesh position={[0, h * 0.32, 0.18]} castShadow>
             <boxGeometry args={[w * 0.48, 0.18, 0.45]} />
-            <meshStandardMaterial color="#b45309" roughness={0.5} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+            <meshStandardMaterial color={themeIsLight ? buildingRoofColor(building, theme) : '#b45309'} roughness={0.5} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
           </mesh>
         </group>
       )}
@@ -388,11 +371,11 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <group position={[w * 0.32, h * 0.4, d * 0.32]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[w * 0.45, h * 0.8, d * 0.45]} />
-            <meshStandardMaterial color="#0f263d" roughness={0.65} metalness={0.25} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+            <meshStandardMaterial color={themeIsLight ? buildingSecondaryColor(building, theme) : '#0f263d'} roughness={0.65} metalness={0.25} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
           </mesh>
           <mesh position={[0, h * 0.4 + 0.08, 0]}>
             <boxGeometry args={[w * 0.47, 0.16, d * 0.47]} />
-            <meshStandardMaterial color="#0284c7" emissive="#00e5ff" emissiveIntensity={isMatch ? 0.2 : 0.04} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+            <meshStandardMaterial color={themeIsLight ? buildingAccentColor(building, theme) : '#0284c7'} emissive={themeIsLight ? buildingAccentColor(building, theme) : '#00e5ff'} emissiveIntensity={themeIsLight ? 0.02 : isMatch ? 0.2 : 0.04} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
           </mesh>
         </group>
       )}
@@ -401,11 +384,11 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <group position={[0, h + 0.35, 0]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[w * 0.72, 0.65, d * 0.72]} />
-            <meshStandardMaterial color="#1a2744" roughness={0.6} metalness={0.3} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+            <meshStandardMaterial color={themeIsLight ? buildingSecondaryColor(building, theme) : '#1a2744'} roughness={0.6} metalness={0.3} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
           </mesh>
           <mesh position={[0, 0, d * 0.36 + 0.02]}>
             <boxGeometry args={[w * 0.6, 0.22, 0.04]} />
-            <meshStandardMaterial color="#38bdf8" emissive="#0284c7" emissiveIntensity={isMatch ? 0.78 : 0.16} transparent opacity={wireframeOnly ? 0.28 : 1} />
+            <meshStandardMaterial color={themeIsLight ? buildingAccentColor(building, theme) : '#38bdf8'} emissive={themeIsLight ? buildingAccentColor(building, theme) : '#0284c7'} emissiveIntensity={themeIsLight ? 0.04 : isMatch ? 0.78 : 0.16} transparent opacity={wireframeOnly ? 0.28 : 1} />
           </mesh>
         </group>
       )}
@@ -414,11 +397,11 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
         <group position={[0, h + 0.24, 0]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[w * 0.66, 0.48, d * 0.66]} />
-            <meshStandardMaterial color="#4a2514" roughness={0.62} metalness={0.28} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
+            <meshStandardMaterial color={themeIsLight ? buildingSecondaryColor(building, theme) : '#4a2514'} roughness={0.62} metalness={0.28} transparent={wireframeOnly || !isMatch} opacity={solidOpacity} />
           </mesh>
           <mesh position={[0, 0.28, d * 0.34]}>
             <boxGeometry args={[w * 0.48, 0.16, 0.04]} />
-            <meshStandardMaterial color="#fb923c" emissive="#f97316" emissiveIntensity={isMatch ? 0.52 : 0.12} transparent opacity={wireframeOnly ? 0.28 : 0.92} />
+            <meshStandardMaterial color={themeIsLight ? buildingAccentColor(building, theme) : '#fb923c'} emissive={themeIsLight ? buildingAccentColor(building, theme) : '#f97316'} emissiveIntensity={themeIsLight ? 0.04 : isMatch ? 0.52 : 0.12} transparent opacity={wireframeOnly ? 0.28 : 0.92} />
           </mesh>
         </group>
       )}
@@ -460,19 +443,19 @@ export const BuildingMesh: React.FC<BuildingMeshProps> = ({ building, heatmapEna
           color={hasHeatUsage ? heatColor : statusColor}
           transparent
           opacity={hasHeatUsage ? 0.12 : isMatch ? 0.08 : 0.01}
-          blending={THREE.AdditiveBlending}
+          blending={hasHeatUsage ? THREE.AdditiveBlending : sceneBlending}
           depthWrite={false}
         />
       </mesh>
 
       {hasHeatUsage && (hovered || isSelected) && (
         <Html position={[0, h + 1.7, 0]} center>
-          <div className="pointer-events-none min-w-52 rounded-lg border border-cyan-400/30 bg-slate-950/90 p-3 text-xs text-slate-200 shadow-neon-cyan backdrop-blur">
-            <div className="font-semibold text-white">{building.name}</div>
-            <div className="mt-1 text-slate-400">
+          <div className={`pointer-events-none min-w-52 rounded-lg border p-3 text-xs backdrop-blur ${palette.htmlPanel}`}>
+            <div className="font-semibold text-[var(--text)]">{building.name}</div>
+            <div className={`mt-1 ${palette.htmlMuted}`}>
               {usageCount} bookings · {usageHours.toFixed(1)} usage hours
             </div>
-            <div className="mt-2 h-1.5 rounded-full bg-slate-800">
+            <div className={`mt-2 h-1.5 rounded-full ${palette.meterTrack}`}>
               <div className="h-full rounded-full" style={{ width: `${Math.max(4, usageIntensity * 100)}%`, background: heatColor }} />
             </div>
           </div>

@@ -1,9 +1,16 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { useCampusStore } from '../store/campusStore';
+import { CampusSceneTheme, scenePalette } from './sceneTheme';
 
-export const CampusGround: React.FC = () => {
+interface CampusGroundProps {
+  theme: CampusSceneTheme;
+}
+
+export const CampusGround: React.FC<CampusGroundProps> = ({ theme }) => {
   const showGrid = useCampusStore((s) => s.showGrid);
+  const palette = scenePalette[theme];
+  const blending = palette.additive ? THREE.AdditiveBlending : THREE.NormalBlending;
 
   // Pathways connecting courtyard plaza to each building entrance
   const pathGeometry = useMemo(() => {
@@ -79,20 +86,20 @@ export const CampusGround: React.FC = () => {
 
   return (
     <group>
-      {/* Dark background base plane */}
+      {/* Theme-aware background base plane */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
         <planeGeometry args={[100, 100]} />
-        <meshBasicMaterial color="#050B14" depthWrite={false} />
+        <meshBasicMaterial color={palette.ground} depthWrite={false} />
       </mesh>
 
       {/* Isometric floor grid */}
       {showGrid && (
         <lineSegments geometry={gridLinesGeometry}>
           <lineBasicMaterial
-            color="#00e5ff"
+            color={palette.grid}
             transparent
-            opacity={0.07}
-            blending={THREE.AdditiveBlending}
+            opacity={palette.gridOpacity}
+            blending={blending}
             depthWrite={false}
           />
         </lineSegments>
@@ -101,11 +108,11 @@ export const CampusGround: React.FC = () => {
       {/* Glowing courtyard & building pathways */}
       <lineSegments geometry={pathGeometry}>
         <lineBasicMaterial
-          color="#00f0ff"
+          color={palette.path}
           transparent
-          opacity={0.65}
+          opacity={palette.pathOpacity}
           linewidth={2}
-          blending={THREE.AdditiveBlending}
+          blending={blending}
           depthWrite={false}
         />
       </lineSegments>
@@ -114,10 +121,10 @@ export const CampusGround: React.FC = () => {
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0.5]}>
         <ringGeometry args={[0, 3.8, 4]} />
         <meshBasicMaterial
-          color="#00e5ff"
+          color={palette.courtyard}
           transparent
-          opacity={0.04}
-          blending={THREE.AdditiveBlending}
+          opacity={palette.courtyardOpacity}
+          blending={blending}
           depthWrite={false}
         />
       </mesh>

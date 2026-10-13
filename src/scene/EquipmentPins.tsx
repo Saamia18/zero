@@ -2,12 +2,18 @@ import React from 'react';
 import { Html } from '@react-three/drei';
 import { MOCK_BUILDINGS, MOCK_EQUIPMENT } from '../data/mock';
 import { useCampusStore } from '../store/campusStore';
+import { buildingAccentColor, CampusSceneTheme, scenePalette } from './sceneTheme';
 
-export const EquipmentPins: React.FC = () => {
+interface EquipmentPinsProps {
+  theme: CampusSceneTheme;
+}
+
+export const EquipmentPins: React.FC<EquipmentPinsProps> = ({ theme }) => {
   const selectedUnitId = useCampusStore((s) => s.selectedUnitId);
   const selectedBuildingId = useCampusStore((s) => s.selectedBuildingId);
   const matchingUnitIds = useCampusStore((s) => s.matchingUnitIds);
   const selectUnit = useCampusStore((s) => s.selectUnit);
+  const palette = scenePalette[theme];
 
   return (
     <group>
@@ -52,18 +58,18 @@ export const EquipmentPins: React.FC = () => {
               }
 
               // Color theme mapping
-              let pinBorderColor = '#00f0ff';
-              let pinBgColor = 'rgba(6, 25, 45, 0.9)';
-              let pinGlowColor = 'rgba(0, 240, 255, 0.5)';
+              let pinBorderColor: string = theme === 'light' ? buildingAccentColor(building, theme) : palette.pin.defaultBorder;
+              let pinBgColor: string = palette.pin.defaultBg;
+              let pinGlowColor: string = palette.pin.defaultGlow;
 
               if (building.colorTheme === 'green') {
-                pinBorderColor = '#22c55e';
-                pinBgColor = 'rgba(6, 38, 20, 0.9)';
-                pinGlowColor = 'rgba(34, 197, 94, 0.5)';
+                pinBorderColor = theme === 'light' ? '#6f7f45' : '#22c55e';
+                pinBgColor = theme === 'light' ? 'rgba(255, 248, 234, 0.94)' : 'rgba(6, 38, 20, 0.9)';
+                pinGlowColor = theme === 'light' ? 'rgba(111, 127, 69, 0.26)' : 'rgba(34, 197, 94, 0.5)';
               } else if (building.colorTheme === 'orange') {
-                pinBorderColor = '#f97316';
-                pinBgColor = 'rgba(40, 18, 6, 0.9)';
-                pinGlowColor = 'rgba(249, 115, 22, 0.5)';
+                pinBorderColor = theme === 'light' ? '#9b5a2e' : '#f97316';
+                pinBgColor = theme === 'light' ? 'rgba(255, 248, 234, 0.94)' : 'rgba(40, 18, 6, 0.9)';
+                pinGlowColor = theme === 'light' ? 'rgba(155, 90, 46, 0.26)' : 'rgba(249, 115, 22, 0.5)';
               }
 
               const bobClass =
@@ -96,14 +102,14 @@ export const EquipmentPins: React.FC = () => {
                         className="relative p-0.5 rounded-full shadow-lg transition-all duration-200"
                         style={{
                           background: pinBgColor,
-                          border: `2px solid ${isSelected ? '#ffffff' : pinBorderColor}`,
+                          border: `2px solid ${isSelected ? palette.pin.selected : pinBorderColor}`,
                           boxShadow: isSelected
-                            ? `0 0 18px #ffffff, 0 0 25px ${pinBorderColor}`
+                            ? `0 0 18px ${palette.pin.selected}, 0 0 25px ${pinBorderColor}`
                             : `0 0 14px ${pinGlowColor}`,
                         }}
                       >
                         {/* Cropped Circular Equipment Icon */}
-                        <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-black/40">
+                        <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center" style={{ background: palette.pin.iconBg }}>
                           <img
                             src={unit.iconUrl}
                             alt={unit.name}
@@ -127,7 +133,7 @@ export const EquipmentPins: React.FC = () => {
                       <div
                         className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[7px] -mt-[1px]"
                         style={{
-                          borderTopColor: isSelected ? '#ffffff' : pinBorderColor,
+                          borderTopColor: isSelected ? palette.pin.selected : pinBorderColor,
                           filter: `drop-shadow(0 2px 4px ${pinGlowColor})`,
                         }}
                       />
@@ -139,7 +145,7 @@ export const EquipmentPins: React.FC = () => {
 
             {selectedBuildingId === building.id && (
               <Html key={`label-${building.id}`} position={[0, building.size[1] + 1.2, 0]} center>
-                <div className="pointer-events-none select-none rounded-full border border-cyan-400/30 bg-slate-950/82 px-3 py-1 text-[11px] font-medium text-slate-100 shadow-glass backdrop-blur">
+                <div className={`pointer-events-none select-none rounded-full border px-3 py-1 text-[11px] font-medium shadow-glass backdrop-blur ${palette.label}`}>
                   {building.code}
                 </div>
               </Html>

@@ -182,14 +182,14 @@ const ForecastChart: React.FC<{ data: ReturnType<typeof buildForecastSeries> }> 
       <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[680px]">
         <defs>
           <linearGradient id="forecastFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--chart-accent)" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="var(--chart-accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((tick) => (
           <line key={tick} x1={padding} x2={width - padding} y1={padding + tick * (height - padding * 2)} y2={padding + tick * (height - padding * 2)} stroke="#1e293b" />
         ))}
-        <polyline points={points.join(' ')} fill="none" stroke="#22d3ee" strokeWidth="3" />
+        <polyline points={points.join(' ')} fill="none" stroke="var(--chart-accent)" strokeWidth="3" />
         <polygon points={`${padding},${height - padding} ${points.join(' ')} ${width - padding},${height - padding}`} fill="url(#forecastFill)" />
         {data.map((point, index) => {
           const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
@@ -240,7 +240,7 @@ const Heatmap: React.FC<{ cells: ReturnType<typeof buildHeatmap> }> = ({ cells }
             {hours.map((hour) => {
               const value = cells.find((cell) => cell.day === dayIndex && cell.hour === hour)?.value ?? 0;
               const opacity = 0.12 + (value / max) * 0.88;
-              return <div key={`${day}-${hour}`} title={`${day} ${hour}:00 · ${value} bookings`} className="h-7 rounded border border-slate-900" style={{ backgroundColor: `rgba(34, 211, 238, ${opacity})` }} />;
+              return <div key={`${day}-${hour}`} title={`${day} ${hour}:00 · ${value} bookings`} className="h-7 rounded border border-slate-900" style={{ backgroundColor: `color-mix(in srgb, var(--chart-accent) ${Math.round(opacity * 100)}%, transparent)` }} />;
             })}
           </React.Fragment>
         ))}
